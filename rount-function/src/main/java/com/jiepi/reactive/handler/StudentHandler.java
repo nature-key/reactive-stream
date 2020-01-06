@@ -29,6 +29,28 @@ public class StudentHandler {
                 .body(studentReposiory.saveAll(mono),Student.class);
     }
 
+    public Mono<ServerResponse> delById(ServerRequest request){
+        String id = request.pathVariable("id");
+        return studentReposiory.findById(id)
+                .flatMap(student ->
+                   studentReposiory.delete(student).then(ServerResponse.ok().build())
+                ).switchIfEmpty(ServerResponse.notFound().build());
+    }
+
+    public Mono<ServerResponse> updateById(ServerRequest request){
+        String id = request.pathVariable("id");
+        Mono<Student> studentMono = request.bodyToMono(Student.class);
+        return studentMono.flatMap(student ->{
+            student.setId(id);
+            return ServerResponse.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(studentReposiory.save(student),Student.class);
+        });
+
+    }
+
+
+
 
 
 }
