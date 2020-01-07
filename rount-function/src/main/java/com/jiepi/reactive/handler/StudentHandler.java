@@ -2,6 +2,7 @@ package com.jiepi.reactive.handler;
 
 import com.jiepi.reactive.bean.Student;
 import com.jiepi.reactive.dto.StudentReposiory;
+import com.jiepi.reactive.util.StudentUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -24,9 +25,13 @@ public class StudentHandler {
 
     public  Mono<ServerResponse> save(ServerRequest request){
         Mono<Student> mono = request.bodyToMono(Student.class);
-        return  ServerResponse.ok()
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(studentReposiory.saveAll(mono),Student.class);
+       return mono.flatMap(student -> {
+           StudentUtil.validateName(student.getName());
+            return  ServerResponse.ok()
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(studentReposiory.save(student),Student.class);
+        });
+
     }
 
     public Mono<ServerResponse> delById(ServerRequest request){
